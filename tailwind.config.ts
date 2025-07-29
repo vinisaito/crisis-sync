@@ -61,7 +61,17 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Monitoring dashboard colors
+				'sev4-incident': 'hsl(var(--sev4-incident))',
+				'sev4-alert': 'hsl(var(--sev4-alert))',
+				'sev3-incident': 'hsl(var(--sev3-incident))',
+				success: 'hsl(var(--success))',
+				warning: 'hsl(var(--warning))',
+				info: 'hsl(var(--info))',
+				'dashboard-bg': 'hsl(var(--dashboard-bg))',
+				'panel-bg': 'hsl(var(--panel-bg))',
+				'hover-bg': 'hsl(var(--hover-bg))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
