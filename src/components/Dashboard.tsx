@@ -134,31 +134,6 @@ const Dashboard = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen w-full flex bg-background text-foreground">
-        {/* Sidebar */}
-        <Sidebar className="w-16">
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {sidebarItems.map((item) => (
-                    <SidebarMenuItem key={item.key}>
-                      <SidebarMenuButton
-                        onClick={() => setActiveSection(activeSection === item.key ? null : item.key)}
-                        className={`w-full justify-center p-3 ${
-                          activeSection === item.key ? 'bg-primary text-primary-foreground' : 'hover:bg-hover-bg'
-                        }`}
-                        tooltip={item.title}
-                      >
-                        <item.icon className="h-5 w-5" />
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-        </Sidebar>
-
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Header */}
@@ -217,6 +192,28 @@ const Dashboard = () => {
                 {activeSection === 'notes' && <ShiftNotes />}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Right Sidebar */}
+        <div className="w-16 bg-sidebar-background border-l border-sidebar-border flex flex-col">
+          <div className="flex flex-col gap-2 p-2">
+            {sidebarItems.map((item) => (
+              <Button
+                key={item.key}
+                variant="ghost"
+                size="icon"
+                onClick={() => setActiveSection(activeSection === item.key ? null : item.key)}
+                className={`w-12 h-12 ${
+                  activeSection === item.key 
+                    ? 'bg-sidebar-primary text-sidebar-primary-foreground' 
+                    : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                }`}
+                title={item.title}
+              >
+                <item.icon className="h-5 w-5" />
+              </Button>
+            ))}
           </div>
         </div>
 
