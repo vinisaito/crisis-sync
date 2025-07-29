@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Settings, Sun, Moon } from 'lucide-react';
+import { Settings, Sun, Moon, AlertTriangle, FileText, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { toast } from '@/hooks/use-toast';
 import { MonitoringCards } from './MonitoringCards';
 import { ActionTable } from './ActionTable';
@@ -80,7 +81,13 @@ const Dashboard = () => {
   // Toggle theme
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle('dark');
+    if (isDarkMode) {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+      document.documentElement.classList.add('dark');
+    }
   };
 
   // Update alert acknowledgment status
@@ -106,84 +113,111 @@ const Dashboard = () => {
     document.documentElement.classList.add('dark');
   }, []);
 
+  const sidebarItems = [
+    {
+      title: "Incidentes Críticos",
+      icon: AlertTriangle,
+      key: 'incidents' as const,
+    },
+    {
+      title: "Acompanhamento RDMs",
+      icon: FileText,
+      key: 'rdm' as const,
+    },
+    {
+      title: "Recados do Turno",
+      icon: MessageSquare,
+      key: 'notes' as const,
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-dashboard-bg text-foreground">
-      <div className="container mx-auto p-6 max-w-7xl">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="text-center flex-1">
-            <h1 className="text-3xl font-bold text-primary mb-2">
-              PAINEL CIOPS - MONITORAÇÃO
-            </h1>
-            <p className="text-muted-foreground">
-              Centro Integrado de Operações e Segurança
-            </p>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowWebhookConfig(true)}
-              className="border-border hover:bg-hover-bg"
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={toggleTheme}
-              className="border-border hover:bg-hover-bg"
-            >
-              {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
-          </div>
-        </div>
+    <SidebarProvider>
+      <div className="min-h-screen w-full flex bg-background text-foreground">
+        {/* Sidebar */}
+        <Sidebar className="w-16">
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {sidebarItems.map((item) => (
+                    <SidebarMenuItem key={item.key}>
+                      <SidebarMenuButton
+                        onClick={() => setActiveSection(activeSection === item.key ? null : item.key)}
+                        className={`w-full justify-center p-3 ${
+                          activeSection === item.key ? 'bg-primary text-primary-foreground' : 'hover:bg-hover-bg'
+                        }`}
+                        tooltip={item.title}
+                      >
+                        <item.icon className="h-5 w-5" />
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
 
         {/* Main Content */}
-        <div className="space-y-8">
-          {/* Monitoring Cards Section */}
-          <div className="text-center">
-            <h2 className="text-xl font-semibold mb-6 text-primary">PAINEL ACIONAMENTOS</h2>
-            <MonitoringCards alertData={alertData} />
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <div className="bg-dashboard-bg border-b border-border p-6">
+            <div className="flex justify-between items-center max-w-7xl mx-auto">
+              <div className="text-center flex-1">
+                <h1 className="text-3xl font-bold text-primary mb-2">
+                  PAINEL CIOPS - MONITORAÇÃO
+                </h1>
+                <p className="text-muted-foreground">
+                  Centro Integrado de Operações e Segurança
+                </p>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setShowWebhookConfig(true)}
+                  className="border-border hover:bg-hover-bg"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={toggleTheme}
+                  className="border-border hover:bg-hover-bg"
+                >
+                  {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
           </div>
 
-          {/* Action Table */}
-          <ActionTable 
-            alertData={alertData} 
-            onUpdateAcknowledgment={updateAlertAcknowledgment}
-            loading={loading}
-          />
+          {/* Main Content Area */}
+          <div className="flex-1 bg-dashboard-bg">
+            <div className="container mx-auto p-6 max-w-7xl">
+              <div className="space-y-8">
+                {/* Monitoring Cards Section */}
+                <div className="text-center">
+                  <h2 className="text-xl font-semibold mb-6 text-primary">PAINEL ACIONAMENTOS</h2>
+                  <MonitoringCards alertData={alertData} />
+                </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-center gap-4 flex-wrap">
-            <Button
-              variant={activeSection === 'incidents' ? 'default' : 'outline'}
-              onClick={() => setActiveSection(activeSection === 'incidents' ? null : 'incidents')}
-              className="border-border hover:bg-hover-bg"
-            >
-              Incidentes Críticos em Andamento
-            </Button>
-            <Button
-              variant={activeSection === 'rdm' ? 'default' : 'outline'}
-              onClick={() => setActiveSection(activeSection === 'rdm' ? null : 'rdm')}
-              className="border-border hover:bg-hover-bg"
-            >
-              Acompanhamento de RDMs
-            </Button>
-            <Button
-              variant={activeSection === 'notes' ? 'default' : 'outline'}
-              onClick={() => setActiveSection(activeSection === 'notes' ? null : 'notes')}
-              className="border-border hover:bg-hover-bg"
-            >
-              Recados do Turno
-            </Button>
+                {/* Action Table */}
+                <ActionTable 
+                  alertData={alertData} 
+                  onUpdateAcknowledgment={updateAlertAcknowledgment}
+                  loading={loading}
+                />
+
+                {/* Expandable Sections */}
+                {activeSection === 'incidents' && <CriticalIncidents />}
+                {activeSection === 'rdm' && <RDMTracker />}
+                {activeSection === 'notes' && <ShiftNotes />}
+              </div>
+            </div>
           </div>
-
-          {/* Expandable Sections */}
-          {activeSection === 'incidents' && <CriticalIncidents />}
-          {activeSection === 'rdm' && <RDMTracker />}
-          {activeSection === 'notes' && <ShiftNotes />}
         </div>
 
         {/* Webhook Configuration Modal */}
@@ -192,7 +226,7 @@ const Dashboard = () => {
           onOpenChange={setShowWebhookConfig} 
         />
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

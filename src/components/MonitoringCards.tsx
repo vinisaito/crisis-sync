@@ -38,7 +38,7 @@ export const MonitoringCards = ({ alertData }: MonitoringCardsProps) => {
   ).length;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-none">
       {/* SEV4 Incidents */}
       <div className="space-y-4">
         <Card className="bg-panel-bg border-sev4-incident/20 hover:border-sev4-incident/40 transition-colors">
