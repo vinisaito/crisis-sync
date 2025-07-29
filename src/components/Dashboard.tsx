@@ -37,8 +37,11 @@ const Dashboard = () => {
       const response = await fetch('https://7nu1y7qzs1.execute-api.us-east-1.amazonaws.com/prod/dados');
       const data = await response.json();
       
+      // Parse the body since API returns {statusCode: 200, body: "[...]"}
+      const apiData = JSON.parse(data.body);
+      
       // Transform API data to match our interface
-      const transformedData: AlertData[] = data.map((item: any, index: number) => ({
+      const transformedData: AlertData[] = apiData.map((item: any, index: number) => ({
         id: `alert-${index}`,
         tipo: item.tipo || 'Incidente',
         alerta: item.alerta || 'N/A',
