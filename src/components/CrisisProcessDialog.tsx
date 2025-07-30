@@ -14,14 +14,14 @@ interface CrisisProcessDialogProps {
 
 export const CrisisProcessDialog = ({ open, onOpenChange, incident }: CrisisProcessDialogProps) => {
   const [operatorName, setOperatorName] = useState('');
-  const [spreadsheetLink, setSpreadsheetLink] = useState('');
+  const [warRoomLink, setWarRoomLink] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!operatorName.trim() || !spreadsheetLink.trim()) {
+    if (!operatorName.trim() || !warRoomLink.trim()) {
       toast({
         title: "Campos obrigatórios",
-        description: "Preencha seu nome e adicione o link da planilha",
+        description: "Preencha seu nome e o link da War Room",
         variant: "destructive",
       });
       return;
@@ -29,46 +29,42 @@ export const CrisisProcessDialog = ({ open, onOpenChange, incident }: CrisisProc
 
     setLoading(true);
     try {
-      // Get crisis webhook from localStorage
-      const crisisWebhook = localStorage.getItem('crisisWebhook');
-      
-      if (!crisisWebhook) {
-        toast({
-          title: "Webhook de crise não configurado",
-          description: "Configure o webhook para processos de crise",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Send crisis process notification
-      const message = {
-        text: `🚨 *PROCESSO DE CRISE INICIADO*\n\n*Incidente:* ${incident?.titulo}\n*Operador:* ${operatorName}\n*Severidade:* ${incident?.severidade}\n*Equipe:* ${incident?.equipe}\n*Planilha:* ${spreadsheetLink}\n\n⚠️ *Processo de crise em andamento - Atenção imediata necessária*`
-      };
-
-      await fetch(crisisWebhook, {
+      // Chamar Edge Function do Supabase para processar a crise
+      const response = await fetch('/functions/v1/crisis-process', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
-        body: JSON.stringify(message),
+        body: JSON.stringify({
+          operatorName,
+          warRoomLink,
+          incidentTitle: incident?.titulo,
+          incidentSeverity: incident?.severidade,
+          incidentTeam: incident?.equipe,
+        }),
       });
 
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Erro ao processar solicitação');
+      }
+
       toast({
-        title: "Processo de crise iniciado",
-        description: "Notificação enviada com sucesso",
+        title: "Processo de crise iniciado com sucesso!",
+        description: `Planilha criada e compartilhada. Notificação enviada no Google Chat.`,
       });
 
       // Reset form and close dialog
       setOperatorName('');
-      setSpreadsheetLink('');
+      setWarRoomLink('');
       onOpenChange(false);
     } catch (error) {
-      console.error('Error sending crisis notification:', error);
+      console.error('Error starting crisis process:', error);
       toast({
         title: "Erro ao iniciar processo de crise",
-        description: "Não foi possível enviar a notificação",
+        description: error instanceof Error ? error.message : "Erro desconhecido",
         variant: "destructive",
       });
     } finally {
@@ -106,12 +102,12 @@ export const CrisisProcessDialog = ({ open, onOpenChange, incident }: CrisisProc
           </div>
           
           <div>
-            <Label htmlFor="spreadsheet-link">Link da Planilha *</Label>
+            <Label htmlFor="war-room-link">Link da War Room *</Label>
             <Input
-              id="spreadsheet-link"
-              value={spreadsheetLink}
-              onChange={(e) => setSpreadsheetLink(e.target.value)}
-              placeholder="Cole o link da planilha aqui"
+              id="war-room-link"
+              value={warRoomLink}
+              onChange={(e) => setWarRoomLink(e.target.value)}
+              placeholder="Cole o link da War Room aqui"
               className="bg-background border-border"
             />
           </div>
