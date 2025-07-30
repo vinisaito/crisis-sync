@@ -29,8 +29,10 @@ const Dashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [showWebhookConfig, setShowWebhookConfig] = useState(false);
   const [alertData, setAlertData] = useState<AlertData[]>([]);
+  const [filteredAlertData, setFilteredAlertData] = useState<AlertData[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState<'incidents' | 'rdm' | 'notes' | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   // Fetch data from API
   const fetchAlertData = async () => {
@@ -58,6 +60,7 @@ const Dashboard = () => {
       }));
       
       setAlertData(transformedData);
+      setFilteredAlertData(transformedData);
       
       // Check for unacknowledged alerts and play sound
       const unacknowledged = transformedData.filter(alert => !alert.acionado);
@@ -106,6 +109,71 @@ const Dashboard = () => {
           : alert
       )
     );
+    setFilteredAlertData(prev => 
+      prev.map(alert => 
+        alert.id === alertId 
+          ? { ...alert, acionado: acknowledged }
+          : alert
+      )
+    );
+  };
+
+  // Filter function for cards
+  const handleCardFilter = (filterType: string) => {
+    let filtered: AlertData[] = [];
+    
+    switch (filterType) {
+      case 'sev4-incidents':
+        filtered = alertData.filter(alert => 
+          alert.tipo.toLowerCase() === 'incidente' && 
+          (alert.severidade === 'SEV4' || alert.severidade.includes('4') || alert.severidade.includes('5'))
+        );
+        break;
+      case 'sev4-alerts':
+        filtered = alertData.filter(alert => 
+          alert.tipo.toLowerCase() === 'solicitação' && 
+          (alert.severidade === 'SEV4' || alert.severidade.includes('4') || alert.severidade.includes('5'))
+        );
+        break;
+      case 'sev3-incidents':
+        filtered = alertData.filter(alert => 
+          alert.tipo.toLowerCase() === 'incidente' && 
+          (alert.severidade === 'SEV3' || alert.severidade.includes('3'))
+        );
+        break;
+      case 'pending-sev4-incidents':
+        filtered = alertData.filter(alert => 
+          alert.tipo.toLowerCase() === 'incidente' && 
+          (alert.severidade === 'SEV4' || alert.severidade.includes('4') || alert.severidade.includes('5')) &&
+          (!alert.e0 || alert.e0 === 'N/A' || alert.e0.trim() === '')
+        );
+        break;
+      case 'pending-sev4-alerts':
+        filtered = alertData.filter(alert => 
+          alert.tipo.toLowerCase() === 'solicitação' && 
+          (alert.severidade === 'SEV4' || alert.severidade.includes('4') || alert.severidade.includes('5')) &&
+          (!alert.e0 || alert.e0 === 'N/A' || alert.e0.trim() === '')
+        );
+        break;
+      case 'pending-sev3-incidents':
+        filtered = alertData.filter(alert => 
+          alert.tipo.toLowerCase() === 'incidente' && 
+          (alert.severidade === 'SEV3' || alert.severidade.includes('3')) &&
+          (!alert.e0 || alert.e0 === 'N/A' || alert.e0.trim() === '')
+        );
+        break;
+      default:
+        filtered = alertData;
+    }
+    
+    if (activeFilter === filterType) {
+      // Se clicar no mesmo filtro, remove o filtro
+      setFilteredAlertData(alertData);
+      setActiveFilter(null);
+    } else {
+      setFilteredAlertData(filtered);
+      setActiveFilter(filterType);
+    }
   };
 
   useEffect(() => {
@@ -183,12 +251,12 @@ const Dashboard = () => {
                 {/* Monitoring Cards Section */}
                 <div className="text-center">
                   <h2 className="text-xl font-semibold mb-6 text-primary">PAINEL ACIONAMENTOS</h2>
-                  <MonitoringCards alertData={alertData} />
+                  <MonitoringCards alertData={alertData} onCardFilter={handleCardFilter} activeFilter={activeFilter} />
                 </div>
 
                 {/* Action Table */}
                 <ActionTable 
-                  alertData={alertData} 
+                  alertData={filteredAlertData} 
                   onUpdateAcknowledgment={updateAlertAcknowledgment}
                   loading={loading}
                 />

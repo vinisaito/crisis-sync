@@ -88,29 +88,29 @@ export const ActionTable = ({ alertData, onUpdateAcknowledgment, loading }: Acti
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="min-w-full">
             <TableHeader>
               <TableRow className="border-border hover:bg-hover-bg">
-                <TableHead className="text-muted-foreground">Tipo</TableHead>
-                <TableHead className="text-muted-foreground">Alerta</TableHead>
-                <TableHead className="text-muted-foreground">Equipe</TableHead>
-                <TableHead className="text-muted-foreground">Abertura</TableHead>
-                <TableHead className="text-muted-foreground">Título</TableHead>
-                <TableHead className="text-muted-foreground">Severidade</TableHead>
-                <TableHead className="text-muted-foreground">Acionado</TableHead>
-                <TableHead className="text-muted-foreground">E0</TableHead>
+                <TableHead className="text-muted-foreground min-w-[100px]">Tipo</TableHead>
+                <TableHead className="text-muted-foreground min-w-[120px]">Alerta</TableHead>
+                <TableHead className="text-muted-foreground min-w-[200px]">Equipe</TableHead>
+                <TableHead className="text-muted-foreground min-w-[150px]">Abertura</TableHead>
+                <TableHead className="text-muted-foreground min-w-[250px]">Título</TableHead>
+                <TableHead className="text-muted-foreground min-w-[100px]">Severidade</TableHead>
+                <TableHead className="text-muted-foreground min-w-[100px]">Acionado</TableHead>
+                <TableHead className="text-muted-foreground min-w-[100px]">E0</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
+                  <TableCell colSpan={8} className="text-center py-8 h-32">
                     Carregando dados...
                   </TableCell>
                 </TableRow>
               ) : alertData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground h-32">
                     Nenhum dado disponível
                   </TableCell>
                 </TableRow>
@@ -122,19 +122,19 @@ export const ActionTable = ({ alertData, onUpdateAcknowledgment, loading }: Acti
                   >
                     <TableCell className="font-medium">{alert.tipo}</TableCell>
                     <TableCell>{alert.alerta}</TableCell>
-                    <TableCell>{alert.equipe}</TableCell>
-                    <TableCell>
+                    <TableCell className="max-w-[200px] break-words">{alert.equipe}</TableCell>
+                    <TableCell className="min-w-[150px]">
                       {new Date(alert.abertura).toLocaleString('pt-BR')}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="max-w-[250px]">
                       <div className="flex items-center gap-2">
-                        <span className="truncate max-w-xs">{alert.titulo}</span>
+                        <span className="break-words whitespace-pre-wrap leading-tight">{alert.titulo}</span>
                         {alert.tipo.toLowerCase().includes('incidente') && (
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleIncidentClick(alert)}
-                            className="p-1 h-auto hover:bg-hover-bg"
+                            className="p-1 h-auto hover:bg-hover-bg flex-shrink-0"
                             title="Iniciar processo de crise"
                           >
                             <ExternalLink className="h-3 w-3" />
