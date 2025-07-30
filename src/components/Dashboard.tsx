@@ -21,6 +21,8 @@ export interface AlertData {
   severidade: 'SEV3' | 'SEV4';
   acionado: boolean;
   e0: string;
+  num_chamado?: string;
+  status?: string;
 }
 
 const Dashboard = () => {
@@ -43,14 +45,16 @@ const Dashboard = () => {
       // Transform API data to match our interface
       const transformedData: AlertData[] = apiData.map((item: any, index: number) => ({
         id: `alert-${index}`,
-        tipo: item.tipo || 'Incidente',
-        alerta: item.alerta || 'N/A',
+        tipo: item.classificacao || 'Incidente',
+        alerta: item.num_chamado || 'N/A',
         equipe: item.equipe || 'Equipe Não Definida',
-        abertura: item.abertura || new Date().toISOString(),
+        abertura: item.dat_abertura || new Date().toISOString(),
         titulo: item.titulo || 'Título não disponível',
-        severidade: item.severidade === 'SEV3' ? 'SEV3' : 'SEV4',
-        acionado: item.acionado || false,
-        e0: item.e0 || 'N/A'
+        severidade: item.severidade?.includes('3') ? 'SEV3' : 'SEV4',
+        acionado: item.status === 'Resolvido',
+        e0: item.status || 'N/A',
+        num_chamado: item.num_chamado,
+        status: item.status
       }));
       
       setAlertData(transformedData);
@@ -106,8 +110,8 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchAlertData();
-    // Refresh data every 30 seconds
-    const interval = setInterval(fetchAlertData, 30000);
+    // Refresh data every 10 minutes
+    const interval = setInterval(fetchAlertData, 600000);
     return () => clearInterval(interval);
   }, []);
 
